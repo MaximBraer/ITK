@@ -29,7 +29,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.OperationRequest"
+                            "$ref": "#/definitions/handlers.OperationRequest"
                         }
                     }
                 ],
@@ -37,25 +37,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.SuccessResponse"
+                            "$ref": "#/definitions/handlers.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid request or insufficient funds",
                         "schema": {
-                            "$ref": "#/definitions/ITK_pkg_api_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "404": {
                         "description": "Wallet not found",
                         "schema": {
-                            "$ref": "#/definitions/ITK_pkg_api_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/ITK_pkg_api_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -78,13 +78,13 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateWalletResponse"
+                            "$ref": "#/definitions/handlers.CreateWalletResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/ITK_pkg_api_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -113,25 +113,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.BalanceResponse"
+                            "$ref": "#/definitions/handlers.BalanceResponse"
                         }
                     },
                     "400": {
                         "description": "Invalid wallet ID",
                         "schema": {
-                            "$ref": "#/definitions/ITK_pkg_api_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "404": {
                         "description": "Wallet not found",
                         "schema": {
-                            "$ref": "#/definitions/ITK_pkg_api_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/ITK_pkg_api_response.Response"
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -139,18 +139,7 @@
         }
     },
     "definitions": {
-        "ITK_pkg_api_response.Response": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_api_handlers.BalanceResponse": {
+        "handlers.BalanceResponse": {
             "type": "object",
             "properties": {
                 "balance": {
@@ -163,7 +152,7 @@
                 }
             }
         },
-        "internal_api_handlers.CreateWalletResponse": {
+        "handlers.CreateWalletResponse": {
             "type": "object",
             "properties": {
                 "walletId": {
@@ -172,7 +161,7 @@
                 }
             }
         },
-        "internal_api_handlers.OperationRequest": {
+        "handlers.OperationRequest": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -193,12 +182,23 @@
                 }
             }
         },
-        "internal_api_handlers.SuccessResponse": {
+        "handlers.SuccessResponse": {
             "type": "object",
             "properties": {
                 "status": {
                     "type": "string",
                     "example": "success"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         }
