@@ -40,3 +40,30 @@ build:
 	go build -o bin/wallet ./cmd/wallet
 	go build -o bin/migrator ./cmd/migrator
 
+k6-constant:
+	@echo "Running k6 constant load test..."
+	k6 run tests/k6/constant_load.js
+
+k6-spike:
+	@echo "Running k6 spike test..."
+	k6 run tests/k6/spike_test.js
+
+k6-stress:
+	@echo "Running k6 stress test..."
+	k6 run tests/k6/stress_test.js
+
+k6-soak:
+	@echo "Running k6 soak test (30+ minutes)..."
+	k6 run tests/k6/soak_test.js
+
+k6-multi:
+	@echo "Running k6 multi-wallet test..."
+	k6 run tests/k6/multi_wallet_test.js
+
+k6-all:
+	@echo "Running all k6 tests (excluding soak)..."
+	$(MAKE) k6-constant
+	$(MAKE) k6-spike
+	$(MAKE) k6-multi
+	$(MAKE) k6-stress
+

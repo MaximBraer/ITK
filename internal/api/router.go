@@ -19,7 +19,7 @@ func NewRouter(log *slog.Logger, walletHandler *handlers.Handler) chi.Router {
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
-	router.Use(middleware.Timeout(5 * time.Second))
+	router.Use(middleware.Timeout(30 * time.Second))
 
 	router.Use(logger.New(log))
 

@@ -76,7 +76,7 @@ func (r *walletRepo) Create(ctx context.Context, walletID uuid.UUID) error {
 		return fmt.Errorf("failed to create wallet: %w", err)
 	}
 
-	r.log.Info("wallet created", slog.String("wallet_id", walletID.String()))
+	r.log.Debug("wallet created", slog.String("wallet_id", walletID.String()))
 	return nil
 }
 
@@ -133,13 +133,14 @@ func (r *walletRepo) executeOperation(ctx context.Context, walletID uuid.UUID, o
 	}
 	defer tx.Rollback(ctx)
 
-	lockSQL, _, err := squirrel.Select("pg_advisory_xact_lock(hashtext(?))").
+	lockKey := uuidToInt64(walletID)
+	lockSQL, lockArgs, err := squirrel.Select("pg_advisory_xact_lock(?)").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("failed to build lock SQL: %w", err)
 	}
-	_, err = tx.Exec(ctx, lockSQL, walletID.String())
+	_, err = tx.Exec(ctx, lockSQL, append(lockArgs, lockKey)...)
 	if err != nil {
 		return fmt.Errorf("failed to acquire advisory lock: %w", err)
 	}
@@ -203,7 +204,7 @@ func (r *walletRepo) executeOperation(ctx context.Context, walletID uuid.UUID, o
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	r.log.Info("operation applied",
+	r.log.Debug("operation applied",
 		slog.String("wallet_id", walletID.String()),
 		slog.String("operation_type", opType),
 		slog.String("amount", amount.String()),
@@ -211,5 +212,15 @@ func (r *walletRepo) executeOperation(ctx context.Context, walletID uuid.UUID, o
 	)
 
 	return nil
+}
+
+func uuidToInt64(u uuid.UUID) int64 {
+	bytes := [16]byte(u)
+	var result int64
+	for i := 0; i < 8; i++ {
+		result ^= int64(bytes[i]) << (i * 8)
+		result ^= int64(bytes[i+8]) << (i * 8)
+	}
+	return result
 }
 

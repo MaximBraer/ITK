@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	"ITK/internal/repository"
+	pkgsync "ITK/pkg/sync"
 
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -32,14 +33,16 @@ type WalletBalance struct {
 }
 
 type walletService struct {
-	repo repository.Repository
-	log  *slog.Logger
+	repo       repository.Repository
+	log        *slog.Logger
+	walletLock *pkgsync.KeyedMutex
 }
 
 func New(repo repository.Repository, log *slog.Logger) Service {
 	return &walletService{
-		repo: repo,
-		log:  log.With(slog.String("component", "service/wallet")),
+		repo:       repo,
+		log:        log.With(slog.String("component", "service/wallet")),
+		walletLock: pkgsync.NewKeyedMutex(),
 	}
 }
 
@@ -52,7 +55,7 @@ func (s *walletService) CreateWallet(ctx context.Context) (uuid.UUID, error) {
 		return uuid.Nil, fmt.Errorf("failed to create wallet: %w", err)
 	}
 
-	s.log.Info("wallet created", slog.String("wallet_id", walletID.String()))
+	s.log.Debug("wallet created", slog.String("wallet_id", walletID.String()))
 	return walletID, nil
 }
 
@@ -77,6 +80,10 @@ func (s *walletService) Deposit(ctx context.Context, walletID uuid.UUID, amount 
 		return ErrInvalidAmount
 	}
 
+	key := walletID.String()
+	s.walletLock.Lock(key)
+	defer s.walletLock.Unlock(key)
+
 	err := s.repo.ApplyOperation(ctx, walletID, "DEPOSIT", amount)
 	if err != nil {
 		if errors.Is(err, repository.ErrWalletNotFound) {
@@ -93,6 +100,10 @@ func (s *walletService) Withdraw(ctx context.Context, walletID uuid.UUID, amount
 	if amount.LessThanOrEqual(decimal.Zero) {
 		return ErrInvalidAmount
 	}
+
+	key := walletID.String()
+	s.walletLock.Lock(key)
+	defer s.walletLock.Unlock(key)
 
 	err := s.repo.ApplyOperation(ctx, walletID, "WITHDRAW", amount)
 	if err != nil {
